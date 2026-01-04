@@ -1,4 +1,5 @@
 use crate::CmdResult;
+use crate::help;
 use crate::stack;
 
 // Logic areas only work on integers, which is a special case of fractions. See stack.rs for more info.
@@ -84,3 +85,25 @@ pub fn commands(cmd: &str) -> CmdResult {
         _ => CmdResult::NoMatch,
     }
 }
+
+pub const HELP: help::Category = help::Category {
+    category: "Logic Operators",
+    commands: &[
+        help::Cmd {
+            command: "and",
+            help: "Performs a bitwise AND operation on the top two integers on the stack.",
+        },
+        help::Cmd {
+            command: "or",
+            help: "Performs a bitwise OR operation on the top two integers on the stack.",
+        },
+        help::Cmd {
+            command: "not",
+            help: "Performs a bitwise NOT operation on the top integer on the stack.",
+        },
+        help::Cmd {
+            command: "xor",
+            help: "Performs a bitwise XOR operation on the top two integers on the stack.",
+        },
+    ],
+};

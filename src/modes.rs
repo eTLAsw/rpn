@@ -1,4 +1,5 @@
 use crate::CmdResult;
+use crate::help;
 use std::sync::Mutex;
 
 #[derive(Clone, Copy)]
@@ -95,3 +96,33 @@ pub fn commands(cmd: &str) -> CmdResult {
         _ => CmdResult::NoMatch,
     }
 }
+
+pub const HELP: help::Category = help::Category {
+    category: "Modes",
+    commands: &[
+        help::Cmd {
+            command: "signed",
+            help: "Set binary mode to signed",
+        },
+        help::Cmd {
+            command: "unsigned",
+            help: "Set binary mode to unsigned",
+        },
+        help::Cmd {
+            command: "width8",
+            help: "Set binary width to 8 bits",
+        },
+        help::Cmd {
+            command: "width16",
+            help: "Set binary width to 16 bits",
+        },
+        help::Cmd {
+            command: "width32",
+            help: "Set binary width to 32 bits",
+        },
+        help::Cmd {
+            command: "width64",
+            help: "Set binary width to 64 bits",
+        },
+    ],
+};

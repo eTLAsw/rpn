@@ -1,4 +1,5 @@
 use crate::CmdResult;
+use crate::help;
 use crate::stack;
 
 // TODO: There should be some error handling here.
@@ -40,3 +41,25 @@ pub fn commands(cmd: &str) -> CmdResult {
         _ => CmdResult::NoMatch,
     }
 }
+
+pub const HELP: help::Category = help::Category {
+    category: "Stack Manipulations",
+    commands: &[
+        help::Cmd {
+            command: "drop",
+            help: "Removes the top value from the stack.",
+        },
+        help::Cmd {
+            command: "dup",
+            help: "Duplicates the top value on the stack.",
+        },
+        help::Cmd {
+            command: "swap",
+            help: "Swaps the top two values on the stack.",
+        },
+        help::Cmd {
+            command: "undo",
+            help: "Undoes the last stack manipulation.",
+        },
+    ],
+};

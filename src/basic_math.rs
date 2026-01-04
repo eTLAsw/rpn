@@ -1,4 +1,5 @@
 use crate::CmdResult;
+use crate::help;
 use crate::stack;
 
 // Basic mathematical operations that work with both floats and fractions.
@@ -148,3 +149,25 @@ pub fn quick_commands(cmd: &char) -> CmdResult {
         _ => CmdResult::NoMatch,
     }
 }
+
+pub const HELP: help::Category = help::Category {
+    category: "Basic Math",
+    commands: &[
+        help::Cmd {
+            command: "add",
+            help: "Adds the top two numbers on the stack.",
+        },
+        help::Cmd {
+            command: "sub",
+            help: "Subtracts the top two numbers on the stack.",
+        },
+        help::Cmd {
+            command: "mul",
+            help: "Multiplies the top two numbers on the stack.",
+        },
+        help::Cmd {
+            command: "div",
+            help: "Divides the top two numbers on the stack.",
+        },
+    ],
+};

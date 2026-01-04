@@ -3,6 +3,7 @@ use std::env;
 
 mod basic_math;
 mod display;
+mod help;
 mod logic_operators;
 mod modes;
 mod stack;
@@ -130,8 +131,14 @@ fn main_loop() -> anyhow::Result<()> {
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
 
+    // If there are command line arguments, process them and exit.
     if args.len() > 0 {
-        // If there are command line arguments, process them and exit.
+        // Special case for help command.
+        if args[0] == "help" {
+            help::print_help();
+            return;
+        }
+
         for arg in args {
             match parse_input(&mut arg.clone()) {
                 Ok(_) => {}
