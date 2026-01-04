@@ -1,8 +1,9 @@
+use crate::CmdResult;
 use crate::stack;
 
 // Basic mathematical operations that work with both floats and fractions.
 
-pub fn add() -> Result<(), &'static str> {
+fn add() -> CmdResult {
     if let Some(values) = stack::get(
         2,
         stack::AcceptedTypes::FLOAT | stack::AcceptedTypes::FRACTIONS,
@@ -16,23 +17,23 @@ pub fn add() -> Result<(), &'static str> {
                 let result_denom = denom1 * denom2;
                 stack::drop(2);
                 stack::push(stack::StackValue::Fraction((result_num, result_denom)));
-                return Ok(());
+                return CmdResult::Success;
             }
             (stack::StackValue::Float(f1), stack::StackValue::Float(f2)) => {
                 let result = f1 + f2;
                 stack::drop(2);
                 stack::push(stack::StackValue::Float(result));
-                return Ok(());
+                return CmdResult::Success;
             }
             _ => {
-                return Err("Unknown data types for addition");
+                return CmdResult::Error("Unknown data types for addition");
             }
         }
     }
-    Err("Not enough or wrong values on stack")
+    CmdResult::Error("Not enough or wrong values on stack")
 }
 
-pub fn div() -> Result<(), &'static str> {
+fn div() -> CmdResult {
     if let Some(values) = stack::get(
         2,
         stack::AcceptedTypes::FLOAT | stack::AcceptedTypes::FRACTIONS,
@@ -43,32 +44,32 @@ pub fn div() -> Result<(), &'static str> {
                 stack::StackValue::Fraction((num2, denom2)),
             ) => {
                 if *num2 == 0 {
-                    return Err("Division by zero");
+                    return CmdResult::Error("Division by zero");
                 }
                 let result_num = num1 * denom2;
                 let result_denom = denom1 * num2;
                 stack::drop(2);
                 stack::push(stack::StackValue::Fraction((result_num, result_denom)));
-                return Ok(());
+                return CmdResult::Success;
             }
             (stack::StackValue::Float(f1), stack::StackValue::Float(f2)) => {
                 if *f2 == 0.0 {
-                    return Err("Division by zero");
+                    return CmdResult::Error("Division by zero");
                 }
                 let result = f1 / f2;
                 stack::drop(2);
                 stack::push(stack::StackValue::Float(result));
-                return Ok(());
+                return CmdResult::Success;
             }
             _ => {
-                return Err("Unknown data types for division");
+                return CmdResult::Error("Unknown data types for division");
             }
         }
     }
-    Err("Not enough or wrong values on stack")
+    CmdResult::Error("Not enough or wrong values on stack")
 }
 
-pub fn mul() -> Result<(), &'static str> {
+fn mul() -> CmdResult {
     if let Some(value) = stack::get(
         2,
         stack::AcceptedTypes::FLOAT | stack::AcceptedTypes::FRACTIONS,
@@ -82,23 +83,23 @@ pub fn mul() -> Result<(), &'static str> {
                 let result_denom = denom1 * denom2;
                 stack::drop(2);
                 stack::push(stack::StackValue::Fraction((result_num, result_denom)));
-                return Ok(());
+                return CmdResult::Success;
             }
             (stack::StackValue::Float(f1), stack::StackValue::Float(f2)) => {
                 let result = f1 * f2;
                 stack::drop(2);
                 stack::push(stack::StackValue::Float(result));
-                return Ok(());
+                return CmdResult::Success;
             }
             _ => {
-                return Err("Unknown data types for multiplication");
+                return CmdResult::Error("Unknown data types for multiplication");
             }
         }
     }
-    Err("Not enough or wrong values on stack")
+    CmdResult::Error("Not enough or wrong values on stack")
 }
 
-pub fn sub() -> Result<(), &'static str> {
+fn sub() -> CmdResult {
     if let Some(value) = stack::get(
         2,
         stack::AcceptedTypes::FLOAT | stack::AcceptedTypes::FRACTIONS,
@@ -112,18 +113,38 @@ pub fn sub() -> Result<(), &'static str> {
                 let result_denom = denom1 * denom2;
                 stack::drop(2);
                 stack::push(stack::StackValue::Fraction((result_num, result_denom)));
-                return Ok(());
+                return CmdResult::Success;
             }
             (stack::StackValue::Float(f1), stack::StackValue::Float(f2)) => {
                 let result = f1 - f2;
                 stack::drop(2);
                 stack::push(stack::StackValue::Float(result));
-                return Ok(());
+                return CmdResult::Success;
             }
             _ => {
-                return Err("Unknown data types for subtraction");
+                return CmdResult::Error("Unknown data types for subtraction");
             }
         }
     }
-    Err("Not enough or wrong values on stack")
+    CmdResult::Error("Not enough or wrong values on stack")
+}
+
+pub fn commands(cmd: &str) -> CmdResult {
+    match cmd {
+        "add" => add(),
+        "sub" => sub(),
+        "mul" => mul(),
+        "div" => div(),
+        _ => CmdResult::NoMatch,
+    }
+}
+
+pub fn quick_commands(cmd: &char) -> CmdResult {
+    match cmd {
+        '+' => add(),
+        '-' => sub(),
+        '*' => mul(),
+        '/' => div(),
+        _ => CmdResult::NoMatch,
+    }
 }

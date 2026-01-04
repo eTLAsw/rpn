@@ -282,6 +282,7 @@ mod tests {
         drop(3);
         assert!(get_values(1).is_none());
 
-        assert_eq!(get_stackbackup_length(), 4);
+        let backup = STACKBACKUP.lock().unwrap();
+        assert_eq!(backup.len(), 4);
     }
 }

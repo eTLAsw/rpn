@@ -1,5 +1,4 @@
 use crossterm::event::{self, Event, KeyCode};
-use std::collections::HashMap;
 use std::env;
 
 mod basic_math;
@@ -9,39 +8,35 @@ mod modes;
 mod stack;
 mod stack_manipulations;
 
+pub enum CmdResult {
+    Success,
+    NoMatch,
+    Error(&'static str),
+}
+
+const COMMANDS_FUNCTIONS: [fn(&str) -> CmdResult; 4] = [
+    basic_math::commands,
+    logic_operators::commands,
+    modes::commands,
+    stack_manipulations::commands,
+];
+
 fn parse_input(input: &mut String) -> Result<(), String> {
-    let mut commands: HashMap<&str, fn() -> Result<(), &'static str>> = HashMap::new();
-
-    // TODO: This way of handling commands is messy, do this more elegantly and modular.
-
-    commands.insert("add", basic_math::add);
-    commands.insert("div", basic_math::div);
-    commands.insert("mul", basic_math::mul);
-    commands.insert("sub", basic_math::sub);
-
-    commands.insert("and", logic_operators::and);
-    commands.insert("not", logic_operators::not);
-    commands.insert("or", logic_operators::or);
-    commands.insert("xor", logic_operators::xor);
-
-    commands.insert("drop", stack_manipulations::drop);
-    commands.insert("dup", stack_manipulations::dup);
-    commands.insert("swap", stack_manipulations::swap);
-    commands.insert("undo", stack_manipulations::undo);
-
-    commands.insert("signed", modes::set_binary_mode_signed);
-    commands.insert("unsigned", modes::set_binary_mode_unsigned);
-    commands.insert("width8", modes::set_binary_width_8);
-    commands.insert("width16", modes::set_binary_width_16);
-    commands.insert("width32", modes::set_binary_width_32);
-    commands.insert("width64", modes::set_binary_width_64);
-
     let trimmed = input.split_whitespace().collect::<Vec<_>>().join(" ");
 
-    if let Some(&action) = commands.get(trimmed.as_str()) {
-        action().map_err(|e| e.to_string())?;
-        input.clear();
-        return Ok(());
+    for commands in COMMANDS_FUNCTIONS.iter() {
+        match commands(&trimmed.as_str()) {
+            CmdResult::Success => {
+                input.clear();
+                return Ok(());
+            }
+            CmdResult::Error(e) => {
+                return Err(e.to_string());
+            }
+            CmdResult::NoMatch => {
+                // Continue processing
+            }
+        }
     }
 
     if trimmed.starts_with("h") {
@@ -93,27 +88,19 @@ fn main_loop() -> anyhow::Result<()> {
                     // If input buffer is empty, check for shortcut keys first.
                     let result = match key.code {
                         KeyCode::Char('q') => return Ok(()),
-
-                        // TODO: Could this also be done in a cleaner way?
-                        KeyCode::Char('+') => basic_math::add(),
-                        KeyCode::Char('/') => basic_math::div(),
-                        KeyCode::Char('*') => basic_math::mul(),
-                        KeyCode::Char('-') => basic_math::sub(),
-
-                        // TODO: An empty error message is a special case meaning "not a shortcut key". Find a better way to handle this.
-                        _ => Err(""),
+                        KeyCode::Char(c) => basic_math::quick_commands(&c),
+                        _ => CmdResult::NoMatch,
                     };
 
                     match result {
-                        Ok(()) => {
+                        CmdResult::Success => {
                             continue;
                         }
-                        Err(e) => {
-                            if e != "" {
-                                error_message = e.to_string();
-                            } else {
-                                // Not a shortcut key, continue to normal input handling.
-                            }
+                        CmdResult::Error(e) => {
+                            error_message = e.to_string();
+                        }
+                        CmdResult::NoMatch => {
+                            // Continue to normal input processing
                         }
                     }
                 }
@@ -160,13 +147,13 @@ fn main() {
         let err = main_loop();
         display::restore().expect("Failed to restore terminal");
         match err {
-            Ok(_) => println!("Exiting..."),
+            Ok(_) => {
+                // Show the resulting stack contents on exit.
+                stack::get_stack_contents()
+                    .iter()
+                    .for_each(|line| println!("{}", line));
+            }
             Err(e) => eprintln!("Error: {}", e),
         }
     }
-
-    // Show the resulting stack contents on exit.
-    stack::get_stack_contents()
-        .iter()
-        .for_each(|line| println!("{}", line));
 }
