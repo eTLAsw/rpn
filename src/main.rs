@@ -15,11 +15,12 @@ pub enum CmdResult {
     Error(&'static str),
 }
 
-const COMMANDS_FUNCTIONS: [fn(&str) -> CmdResult; 4] = [
+const COMMANDS_FUNCTIONS: [fn(&str) -> CmdResult; 5] = [
     basic_math::commands,
     logic_operators::commands,
     modes::commands,
     stack_manipulations::commands,
+    help::commands,
 ];
 
 fn parse_input(input: &mut String) -> Result<(), String> {
@@ -84,6 +85,7 @@ fn main_loop() -> anyhow::Result<()> {
 
         if event::poll(std::time::Duration::from_millis(100))? {
             error_message.clear();
+            help::clear_help();
             if let Event::Key(key) = event::read().unwrap() {
                 if input_buffer.len() == 0 {
                     // If input buffer is empty, check for shortcut keys first.

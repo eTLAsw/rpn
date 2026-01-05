@@ -7,6 +7,7 @@ use ratatui::{Terminal, backend::CrosstermBackend};
 use std::io::{self, Stdout};
 use std::sync::Mutex;
 
+use crate::help;
 use crate::modes;
 use crate::stack;
 
@@ -61,6 +62,10 @@ pub fn draw(input: &str, error: &str) -> anyhow::Result<()> {
 
         // Stack area
         let mut stack_contents = stack::get_stack_contents();
+        // TODO: Crude. Clean up later.
+        if help::display_help() {
+            stack_contents = help::get_help();
+        }
         while stack_contents.len() < f.area().height as usize - 2 {
             stack_contents.insert(0, "".to_string());
         }
